@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Birthday Magic</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background:linear-gradient(135deg,#ffe6f0,#fff5e6);
+    overflow:hidden;
+}
+
+.page{
+    display:none;
+    height:100vh;
+    text-align:center;
+    padding:20px;
+}
+.active{display:block;}
+
+button{
+    background:#ff4d88;
+    color:white;
+    border:none;
+    padding:15px 30px;
+    border-radius:40px;
+    font-size:16px;
+    cursor:pointer;
+}
+
+/* Cake Area */
+.cake-container{
+    position:relative;
+    width:300px;
+    height:200px;
+    margin:40px auto;
+}
+
+.cake{
+    width:100%;
+    height:150px;
+    background:#8B4513;
+    border-radius:15px;
+    position:absolute;
+    bottom:0;
+    transition:0.4s;
+}
+
+.cake-top{
+    position:absolute;
+    width:100%;
+    height:40px;
+    background:pink;
+    border-radius:50%;
+    top:20px;
+}
+
+/* Split Effect */
+.left-half, .right-half{
+    position:absolute;
+    width:50%;
+    height:150px;
+    background:#8B4513;
+    bottom:0;
+    transition:0.5s;
+}
+
+.left-half{left:0;}
+.right-half{right:0;}
+
+.split .left-half{
+    transform:translateX(-40px);
+}
+.split .right-half{
+    transform:translateX(40px);
+}
+
+/* Cutting Line */
+.cut-line{
+    position:absolute;
+    width:100%;
+    height:3px;
+    background:red;
+    top:80px;
+    display:none;
+}
+
+/* Confetti */
+.confetti{
+    position:fixed;
+    width:8px;
+    height:8px;
+    top:-10px;
+    animation:fall linear forwards;
+}
+
+@keyframes fall{
+    to{
+        transform:translateY(100vh) rotate(720deg);
+        opacity:0;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- PAGE 1 -->
+<div class="page active" id="page1">
+<h1>Happy Birthday 🎂</h1>
+<button onclick="nextPage(2)">Start ✨</button>
+</div>
+
+<!-- PAGE 2 -->
+<div class="page" id="page2">
+<h1>Love Letter 💌</h1>
+<button onclick="nextPage(3)">Continue ✨</button>
+</div>
+
+<!-- PAGE 3 -->
+<div class="page" id="page3">
+<h1>Cut Your Cake ✂️</h1>
+
+<div class="cake-container"
+     onmousedown="startDrag(event)"
+     onmousemove="drag(event)"
+     onmouseup="endDrag()"
+     onmouseleave="endDrag()">
+
+    <div class="cake" id="cake">
+        <div class="cake-top"></div>
+        <div class="left-half"></div>
+        <div class="right-half"></div>
+    </div>
+
+    <div class="cut-line" id="cutLine"></div>
+</div>
+
+<button onclick="nextPage(4)">Continue ✨</button>
+</div>
+
+<!-- PAGE 4 -->
+<div class="page" id="page4">
+<h1>Make a Wish ✨</h1>
+<button onclick="nextPage(5)">Wish Done 💫</button>
+</div>
+
+<!-- PAGE 5 -->
+<div class="page" id="page5">
+<h1>Surprise 🎉</h1>
+<button onclick="createConfetti()">Celebrate 🎊</button>
+</div>
+
+<script>
+
+/* Multi-page system */
+function nextPage(num){
+    document.querySelector('.active').classList.remove('active');
+    document.getElementById("page"+num).classList.add('active');
+}
+
+/* Drag Cutting Logic */
+let isDragging=false;
+let startX=0;
+
+function startDrag(e){
+    isDragging=true;
+    startX=e.offsetX;
+    document.getElementById("cutLine").style.display="block";
+}
+
+function drag(e){
+    if(!isDragging) return;
+
+    let line=document.getElementById("cutLine");
+    line.style.left=e.offsetX+"px";
+
+    if(e.offsetX > 140 && e.offsetX < 160){
+        document.getElementById("cake").classList.add("split");
+        createConfetti();
+    }
+}
+
+function endDrag(){
+    isDragging=false;
+    document.getElementById("cutLine").style.display="none";
+}
+
+/* Confetti */
+function createConfetti(){
+    for(let i=0;i<60;i++){
+        let conf=document.createElement("div");
+        conf.className="confetti";
+        conf.style.left=Math.random()*100+"vw";
+        conf.style.backgroundColor=`hsl(${Math.random()*360},100%,50%)`;
+        conf.style.animationDuration=(Math.random()*3+2)+"s";
+        document.body.appendChild(conf);
+        setTimeout(()=>conf.remove(),4000);
+    }
+}
+
+</script>
+
+</body>
+</html>
