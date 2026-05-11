@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Birthday Magic</title>
+<title>Birthday Website</title>
 
 <style>
 body{
@@ -18,7 +18,13 @@ body{
     text-align:center;
     padding:20px;
 }
-.active{display:block;}
+
+.page.active{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+}
 
 button{
     background:#ff4d88;
@@ -30,22 +36,14 @@ button{
     cursor:pointer;
 }
 
-/* Cake Area */
-.cake-container{
-    position:relative;
-    width:300px;
-    height:200px;
-    margin:40px auto;
-}
-
+/* Cake */
 .cake{
-    width:100%;
+    width:280px;
     height:150px;
     background:#8B4513;
     border-radius:15px;
-    position:absolute;
-    bottom:0;
-    transition:0.4s;
+    position:relative;
+    margin:40px auto;
 }
 
 .cake-top{
@@ -54,38 +52,27 @@ button{
     height:40px;
     background:pink;
     border-radius:50%;
-    top:20px;
+    top:-20px;
 }
 
-/* Split Effect */
-.left-half, .right-half{
+.split .left{
+    transform:translateX(-40px);
+}
+.split .right{
+    transform:translateX(40px);
+}
+
+.left,.right{
     position:absolute;
     width:50%;
     height:150px;
     background:#8B4513;
     bottom:0;
-    transition:0.5s;
+    transition:0.4s;
 }
 
-.left-half{left:0;}
-.right-half{right:0;}
-
-.split .left-half{
-    transform:translateX(-40px);
-}
-.split .right-half{
-    transform:translateX(40px);
-}
-
-/* Cutting Line */
-.cut-line{
-    position:absolute;
-    width:100%;
-    height:3px;
-    background:red;
-    top:80px;
-    display:none;
-}
+.left{left:0;}
+.right{right:0;}
 
 /* Confetti */
 .confetti{
@@ -93,7 +80,7 @@ button{
     width:8px;
     height:8px;
     top:-10px;
-    animation:fall linear forwards;
+    animation:fall 3s linear forwards;
 }
 
 @keyframes fall{
@@ -116,12 +103,13 @@ button{
 <!-- PAGE 2 -->
 <div class="page" id="page2">
 <h1>Love Letter 💌</h1>
+<p>My dearest birthday girl 💖</p>
 <button onclick="nextPage(3)">Continue ✨</button>
 </div>
 
 <!-- PAGE 3 -->
 <div class="page" id="page3">
-<h1>Cut Your Cake ✂️</h1>
+<h1>Cut the Cake ✂️</h1>
 
 <div class="cake-container"
      onmousedown="startDrag(event)"
@@ -131,11 +119,10 @@ button{
 
     <div class="cake" id="cake">
         <div class="cake-top"></div>
-        <div class="left-half"></div>
-        <div class="right-half"></div>
+        <div class="left"></div>
+        <div class="right"></div>
     </div>
 
-    <div class="cut-line" id="cutLine"></div>
 </div>
 
 <button onclick="nextPage(4)">Continue ✨</button>
@@ -155,37 +142,32 @@ button{
 
 <script>
 
-/* Multi-page system */
+/* Page Switch */
 function nextPage(num){
     document.querySelector('.active').classList.remove('active');
     document.getElementById("page"+num).classList.add('active');
 }
 
-/* Drag Cutting Logic */
+/* Cake Drag Cut */
 let isDragging=false;
-let startX=0;
 
 function startDrag(e){
     isDragging=true;
-    startX=e.offsetX;
-    document.getElementById("cutLine").style.display="block";
 }
 
 function drag(e){
     if(!isDragging) return;
 
-    let line=document.getElementById("cutLine");
-    line.style.left=e.offsetX+"px";
+    let cake=document.getElementById("cake");
 
-    if(e.offsetX > 140 && e.offsetX < 160){
-        document.getElementById("cake").classList.add("split");
+    if(e.offsetX > 130 && e.offsetX < 150){
+        cake.classList.add("split");
         createConfetti();
     }
 }
 
 function endDrag(){
     isDragging=false;
-    document.getElementById("cutLine").style.display="none";
 }
 
 /* Confetti */
@@ -195,7 +177,6 @@ function createConfetti(){
         conf.className="confetti";
         conf.style.left=Math.random()*100+"vw";
         conf.style.backgroundColor=`hsl(${Math.random()*360},100%,50%)`;
-        conf.style.animationDuration=(Math.random()*3+2)+"s";
         document.body.appendChild(conf);
         setTimeout(()=>conf.remove(),4000);
     }
