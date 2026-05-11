@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Birthday Website</title>
+<title>Birthday Surprise</title>
 
 <style>
 body{
@@ -18,13 +18,9 @@ body{
     text-align:center;
     padding:20px;
 }
+.active{display:block;}
 
-.page.active{
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-}
+h1{color:#ff4d88;}
 
 button{
     background:#ff4d88;
@@ -36,14 +32,48 @@ button{
     cursor:pointer;
 }
 
+/* Envelope */
+.envelope{
+    width:220px;
+    height:150px;
+    background:#ff99bb;
+    margin:40px auto;
+    position:relative;
+    border-radius:10px;
+    cursor:pointer;
+}
+.envelope:before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:0;
+    width:0;
+    height:0;
+    border-left:110px solid transparent;
+    border-right:110px solid transparent;
+    border-bottom:80px solid #ff4d88;
+    transition:0.5s;
+}
+.envelope.open:before{
+    transform:rotateX(180deg);
+}
+
 /* Cake */
+.cake-container{
+    position:relative;
+    width:300px;
+    height:200px;
+    margin:40px auto;
+}
+
 .cake{
-    width:280px;
+    width:100%;
     height:150px;
     background:#8B4513;
     border-radius:15px;
-    position:relative;
-    margin:40px auto;
+    position:absolute;
+    bottom:0;
+    transition:0.4s;
 }
 
 .cake-top{
@@ -52,27 +82,46 @@ button{
     height:40px;
     background:pink;
     border-radius:50%;
-    top:-20px;
+    top:20px;
 }
 
-.split .left{
-    transform:translateX(-40px);
-}
-.split .right{
-    transform:translateX(40px);
-}
-
-.left,.right{
+/* Split */
+.left-half,.right-half{
     position:absolute;
     width:50%;
     height:150px;
     background:#8B4513;
     bottom:0;
-    transition:0.4s;
+    transition:0.5s;
 }
 
-.left{left:0;}
-.right{right:0;}
+.left-half{left:0;}
+.right-half{right:0;}
+
+.split .left-half{
+    transform:translateX(-40px);
+}
+.split .right-half{
+    transform:translateX(40px);
+}
+
+/* Gift */
+.gift{
+    width:160px;
+    height:160px;
+    background:#ff4d88;
+    margin:50px auto;
+    border-radius:15px;
+    position:relative;
+    cursor:pointer;
+}
+.gift:before,.gift:after{
+    content:"";
+    position:absolute;
+    background:white;
+}
+.gift:before{width:20px;height:160px;left:70px;}
+.gift:after{width:160px;height:20px;top:70px;}
 
 /* Confetti */
 .confetti{
@@ -80,7 +129,7 @@ button{
     width:8px;
     height:8px;
     top:-10px;
-    animation:fall 3s linear forwards;
+    animation:fall linear forwards;
 }
 
 @keyframes fall{
@@ -96,32 +145,43 @@ button{
 
 <!-- PAGE 1 -->
 <div class="page active" id="page1">
-<h1>Happy Birthday 🎂</h1>
-<button onclick="nextPage(2)">Start ✨</button>
+<h1>Happy Birthday 🎂✨</h1>
+<button onclick="nextPage(2)">Let’s Gooo ✨</button>
 </div>
 
 <!-- PAGE 2 -->
 <div class="page" id="page2">
-<h1>Love Letter 💌</h1>
-<p>My dearest birthday girl 💖</p>
+<h1>A Birthday Love Letter 💌</h1>
+<div class="envelope" id="envelope" onclick="openLetter()"></div>
+
+<div id="letter" style="display:none;">
+<p>
+My dearest birthday girl 💖<br><br>
+You deserve all the magic, happiness and love in the world.<br><br>
+Forever yours 💕
+</p>
 <button onclick="nextPage(3)">Continue ✨</button>
+</div>
 </div>
 
 <!-- PAGE 3 -->
 <div class="page" id="page3">
-<h1>Cut the Cake ✂️</h1>
+<h1>It’s Cake Time 🎂</h1>
+<p>Drag across the cake to cut ✂️</p>
 
 <div class="cake-container"
-     onmousedown="startDrag(event)"
-     onmousemove="drag(event)"
-     onmouseup="endDrag()"
-     onmouseleave="endDrag()">
+onmousedown="startDrag(event)"
+onmouseup="endDrag()"
+onmousemove="mouseMove(event)"
+ontouchstart="startDrag(event)"
+ontouchend="endDrag()"
+ontouchmove="touchMove(event)">
 
-    <div class="cake" id="cake">
-        <div class="cake-top"></div>
-        <div class="left"></div>
-        <div class="right"></div>
-    </div>
+<div class="cake" id="cake">
+<div class="cake-top"></div>
+<div class="left-half"></div>
+<div class="right-half"></div>
+</div>
 
 </div>
 
@@ -130,56 +190,93 @@ button{
 
 <!-- PAGE 4 -->
 <div class="page" id="page4">
-<h1>Make a Wish ✨</h1>
-<button onclick="nextPage(5)">Wish Done 💫</button>
+<h1>Time to Make a Wish ✨</h1>
+<button onclick="nextPage(5)">I’ve Made My Wish 💫</button>
 </div>
 
 <!-- PAGE 5 -->
 <div class="page" id="page5">
 <h1>Surprise 🎉</h1>
-<button onclick="createConfetti()">Celebrate 🎊</button>
+<div class="gift" onclick="openGift()"></div>
+<div id="finalMsg" style="display:none;">
+<h2>Happy Birthday! 💖</h2>
+<button onclick="restart()">Replay ✨</button>
+</div>
 </div>
 
 <script>
 
-/* Page Switch */
 function nextPage(num){
-    document.querySelector('.active').classList.remove('active');
-    document.getElementById("page"+num).classList.add('active');
+document.querySelector('.active').classList.remove('active');
+document.getElementById("page"+num).classList.add('active');
 }
 
-/* Cake Drag Cut */
+/* Envelope */
+function openLetter(){
+document.getElementById("envelope").classList.add("open");
+document.getElementById("letter").style.display="block";
+createConfetti();
+}
+
+/* Cake Drag */
 let isDragging=false;
+let cake=document.getElementById("cake");
+let splitDone=false;
 
 function startDrag(e){
-    isDragging=true;
-}
-
-function drag(e){
-    if(!isDragging) return;
-
-    let cake=document.getElementById("cake");
-
-    if(e.offsetX > 130 && e.offsetX < 150){
-        cake.classList.add("split");
-        createConfetti();
-    }
+isDragging=true;
+splitDone=false;
 }
 
 function endDrag(){
-    isDragging=false;
+isDragging=false;
+}
+
+function mouseMove(e){
+if(!isDragging) return;
+let rect=cake.getBoundingClientRect();
+let x=e.clientX-rect.left;
+checkCut(x);
+}
+
+function touchMove(e){
+if(!isDragging) return;
+let touch=e.touches[0];
+let rect=cake.getBoundingClientRect();
+let x=touch.clientX-rect.left;
+checkCut(x);
+}
+
+function checkCut(x){
+let center=cake.offsetWidth/2;
+if(x>center-10 && x<center+10 && !splitDone){
+cake.classList.add("split");
+createConfetti();
+splitDone=true;
+}
+}
+
+/* Gift */
+function openGift(){
+document.getElementById("finalMsg").style.display="block";
+createConfetti();
 }
 
 /* Confetti */
 function createConfetti(){
-    for(let i=0;i<60;i++){
-        let conf=document.createElement("div");
-        conf.className="confetti";
-        conf.style.left=Math.random()*100+"vw";
-        conf.style.backgroundColor=`hsl(${Math.random()*360},100%,50%)`;
-        document.body.appendChild(conf);
-        setTimeout(()=>conf.remove(),4000);
-    }
+for(let i=0;i<70;i++){
+let conf=document.createElement("div");
+conf.className="confetti";
+conf.style.left=Math.random()*100+"vw";
+conf.style.backgroundColor=`hsl(${Math.random()*360},100%,50%)`;
+conf.style.animationDuration=(Math.random()*3+2)+"s";
+document.body.appendChild(conf);
+setTimeout(()=>conf.remove(),4000);
+}
+}
+
+function restart(){
+location.reload();
 }
 
 </script>
